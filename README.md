@@ -2,7 +2,7 @@
 
 A lightweight Firefox (Manifest V3) extension that restores background music playback for static photos and carousels on the Instagram Web client.
 
-## 📌 The Concept & The Problem
+## The Concept & The Problem
 
 The desktop/web version of Instagram is intentionally limited by Meta compared to its mobile counterpart. When a user posts a photo or a carousel with an attached music track, the mobile app downloads and plays the selected audio segment. 
 
@@ -12,7 +12,7 @@ However, on the web client:
 
 **The catch?** The music metadata, including the direct progressive download URL (`.m4a`/`.mp4`), the exact start time in milliseconds, and the track duration, **are still being transmitted by the server** in the GraphQL/API responses. The frontend simply ignores them.
 
-## 🚀 The Solution
+## The Solution
 
 This extension acts as a transparent middleware that bridges the gap between the incoming data and the UI:
 
