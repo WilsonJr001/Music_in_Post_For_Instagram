@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Photo Audio Enabler",
+  "version": "1.0.0",
+  "description": "Enables audio playback on Instagram photo/carousel posts that have associated music metadata.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "instagram-photo-audio@musicpost",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.instagram.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": ["*://*.instagram.com/*"]
+    }
+  ]
+}

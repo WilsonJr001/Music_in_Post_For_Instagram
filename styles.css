@@ -1,0 +1,179 @@
+/* ============================================================
+ * Instagram Photo Audio Enabler — Floating Audio Player Styles
+ * ============================================================
+ * A minimal, non-intrusive player that overlays Instagram photo
+ * posts. Uses glassmorphism / dark-translucent aesthetics to
+ * blend naturally with Instagram's native dark UI.
+ * ============================================================ */
+
+/* ----------------------------------------------------------
+ * 1. Player Container
+ * ---------------------------------------------------------- */
+
+.ig-audio-player-container {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 6px 12px;
+
+  /* Hidden by default — revealed on hover or when playing */
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  pointer-events: auto;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+}
+
+/* ----------------------------------------------------------
+ * 2. Show / Hide Logic
+ * ---------------------------------------------------------- */
+
+/* Always visible when audio is playing */
+.ig-audio-player-container.is-playing,
+/* Show on parent hover */
+*:hover > .ig-audio-player-container,
+/* Keep visible while interacting with the player itself */
+.ig-audio-player-container:hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----------------------------------------------------------
+ * 3. Play / Pause Button
+ * ---------------------------------------------------------- */
+
+.ig-audio-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+  line-height: 1;
+}
+
+.ig-audio-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.ig-audio-btn:active {
+  transform: scale(0.95);
+}
+
+/* ----------------------------------------------------------
+ * 4. Volume Slider (input[type="range"])
+ * ---------------------------------------------------------- */
+
+.ig-audio-volume {
+  width: 50px;
+  height: 3px;
+
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* WebKit thumb */
+.ig-audio-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ig-audio-volume:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Firefox thumb */
+.ig-audio-volume::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ig-audio-volume:hover::-moz-range-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.ig-audio-volume::-moz-range-track {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  height: 3px;
+  border: none;
+}
+
+/* ----------------------------------------------------------
+ * 5. Pulse Animation — Playing State
+ * ---------------------------------------------------------- */
+
+@keyframes ig-audio-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(225, 48, 108, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(225, 48, 108, 0);
+  }
+}
+
+.ig-audio-player-container.is-playing .ig-audio-btn {
+  animation: ig-audio-pulse 2s ease infinite;
+}
+
+/* ----------------------------------------------------------
+ * 6. Responsive — Hide volume on very small containers
+ * ---------------------------------------------------------- */
+
+@container (max-width: 200px) {
+  .ig-audio-volume {
+    display: none;
+  }
+}
+
+/* Fallback for browsers without container query support */
+@media (max-width: 200px) {
+  .ig-audio-volume {
+    display: none;
+  }
+}
