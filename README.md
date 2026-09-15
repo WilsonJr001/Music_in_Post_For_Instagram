@@ -1,54 +1,73 @@
 # Instagram Web Photo Audio Enabler
 
-A lightweight Firefox (Manifest V3) extension that restores background music playback for static photos and carousels on the Instagram Web client.
+A Firefox extension that plays the music attached to photo and carousel
+posts on Instagram's web client.
 
-## The Concept & The Problem
+## The problem
 
-The desktop/web version of Instagram is intentionally limited by Meta compared to its mobile counterpart. When a user posts a photo or a carousel with an attached music track, the mobile app downloads and plays the selected audio segment. 
+Post a photo with a song and the mobile app plays it. The web client shows
+the same post in silence — it has no UI for a non-video track and never
+asks for one.
 
-However, on the web client:
-1. Photos and carousels are rendered purely as static elements (`<img>`).
-2. The web interface completely lacks the UI and logic to play the background audio track for non-video posts.
+The data is not missing for lack of trying. Open a post on the web and
+Instagram fetches the progressive `.m4a`/`.mp4` URL, the start offset in
+milliseconds, and the clip length. It just never does anything with them.
 
-**The catch?** The music metadata, including the direct progressive download URL (`.m4a`/`.mp4`), the exact start time in milliseconds, and the track duration, **are still being transmitted by the server** in the GraphQL/API responses. The frontend simply ignores them.
+This extension does.
 
-## The Solution
+## What it does
 
-This extension acts as a transparent middleware that bridges the gap between the incoming data and the UI:
+- Plays the author's chosen segment over photo and carousel posts, in the
+  feed, on profiles and on post pages
+- Follows whichever post you are looking at, one at a time
+- Starts muted, every time — a page load never begins playing on its own
+- Leaves video posts alone; Instagram already handles those
 
-1. **Network Interception (`inject.js`):** 
-   Injected directly into the page's `MAIN` execution world, it monkey-patches the native `window.fetch` to listen to Instagram's API responses.
-2. **Resilient Data Parsing (BFS Scanner):** 
-   Instead of relying on fragile, hardcoded JSON paths that break when Meta updates their GraphQL structure, the script uses a Breadth-First Search (BFS) algorithm to efficiently scan the response payload, extracting the `shortcode`, `audio_url`, `start_time`, and `duration`.
-3. **Seamless UI Injection (`content.js`):** 
-   When a match is found, the extension attaches a custom HTML5 `<audio>` player over the target `<article>`. It respects the exact time slice chosen by the post author and loops the segment seamlessly.
-4. **Smart Playback:** 
-   Utilizes the `IntersectionObserver` API to play the audio only when the photo is centered on the user's screen, automatically pausing when scrolled out of view.
+## Install (temporary add-on)
 
-## Installation (Developer Mode)
+1. Clone the repository
+2. Open `about:debugging#/runtime/this-firefox`
+3. **Load Temporary Add-on…** and select `manifest.json`
+4. Open Instagram and scroll
 
-Currently, this extension is meant to be loaded locally as a temporary add-on in Firefox.
+Requires Firefox 128 or newer, for `world: "MAIN"` content scripts.
 
-1. Clone or download this repository.
-2. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
-3. Click on **Load Temporary Add-on...**
-4. Select the `manifest.json` file from the project directory.
-5. Open [Instagram](https://www.instagram.com) and scroll through your feed.
+Temporary add-ons are unloaded when Firefox closes, and editing a file does
+not reload them — use **Reload** in `about:debugging` after changes.
 
-*Note: Ensure Firefox's Autoplay policies are set to "Allow Audio and Video" for `instagram.com` so the music can play seamlessly as you scroll.*
+## Using it
 
-## Project Structure
+A muted badge appears briefly on posts that have a track, then fades. Hover
+a post to bring it back. Click 🔇 to turn sound on; the choice applies to
+every post and the volume is remembered between visits. The unmuted state
+is not — closing Instagram and reopening it starts quiet.
 
-- `manifest.json`: Configuration and permissions for Firefox (Manifest V3).
-- `inject.js`: Runs in the page context. Intercepts `fetch` calls, parses JSON via BFS, and dispatches custom DOM events.
-- `content.js`: Runs in the extension sandbox. Listens for audio metadata, maps it to the DOM, handles the IntersectionObserver, and controls playback logic (looping specific segments).
-- `styles.css`: Styles the minimalist floating player overlay.
+## How it works
 
-## Known Limitations
+Instagram withholds the audio from the feed entirely and only sends it when
+you open a post, so the extension asks for it itself, for posts that reach
+the screen. The details, and the reasoning behind the less obvious parts,
+are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-- **SSR (Server-Side Rendering) Initial Load:** The very first batch of posts in the feed might load via inline scripts rather than `fetch`, requiring the user to scroll slightly for the interception to catch subsequent API calls.
-- **Autoplay Policies:** Browsers actively block unmuted autoplay without prior user interaction. You may need to click on the page at least once for the audio playback to commence.
+## Tests
+
+```
+node test/run.js
+```
+
+No dependencies, no build step.
+
+## Known limitations
+
+- **Mixed carousels.** A carousel that mixes photos with a video drops the
+  player once the video slide renders, to avoid two tracks at once.
+- **Request cost.** Nothing in the feed says which photos have music, so
+  posts are looked up as they reach the screen and most lookups find
+  nothing. Serialised, one per post, capped per page load.
+- **Clip length.** A few responses carry only the full track length. The
+  segment is capped at 90 seconds when that happens, Instagram's own limit.
 
 ## License
 
-This project is for educational and experimental purposes only. It is not affiliated with, endorsed, or sponsored by Meta or Instagram.
+For educational and experimental purposes. Not affiliated with, endorsed
+by, or sponsored by Meta or Instagram.
