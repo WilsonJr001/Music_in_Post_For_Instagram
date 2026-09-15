@@ -16,18 +16,22 @@
   right: 12px;
   z-index: 10;
 
+  /* Geometry measured off Instagram's own control: a 31px-wide capsule,
+     7px of padding around a 17px knob, 14px between track and icon. */
   display: flex;
-  flex-direction: column;   /* volume above the button, as Instagram stacks it */
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
 
-  background: rgba(0, 0, 0, 0.55);
+  width: 31px;
+  padding: 7px 0;
+
+  background: rgba(40, 41, 45, 0.9);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 6px 12px;
+  border: none;             /* Instagram draws no edge on theirs */
+  border-radius: 16px;
 
   /* Hidden by default — revealed on hover or when playing */
   opacity: 0;
@@ -93,7 +97,7 @@ article:hover .ig-audio-player-container.is-hinting,
 
 article:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
 .ig-audio-player-container.is-hinting:hover .ig-audio-volume {
-  height: 56px;
+  height: 87px;
   opacity: 1;
   margin-bottom: 0;
   pointer-events: auto;
@@ -137,7 +141,7 @@ article:hover .ig-audio-player-container.is-idle,
 
 article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
 .ig-audio-player-container.is-idle:hover .ig-audio-volume {
-  height: 56px;
+  height: 87px;
   opacity: 1;
   margin-bottom: 0;
   pointer-events: auto;
@@ -161,11 +165,11 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
  * ---------------------------------------------------------- */
 
 .ig-audio-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 17px;
+  height: 17px;
 
-  background: rgba(255, 255, 255, 0.15);
+  /* Instagram puts the glyph straight on the capsule — no disc behind it */
+  background: none;
   border: none;
   color: #fff;
 
@@ -179,18 +183,17 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
   line-height: 1;
 }
 
-/* Instagram ships these glyphs at 12px inside a larger hit area; 16 suits
-   the 28px button here. currentColor keeps them on the button's color. */
+/* Instagram renders these glyphs at exactly 12x12 inside a larger hit
+   area. currentColor keeps them on the button's color. */
 .ig-audio-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   display: block;
   pointer-events: none;
 }
 
 .ig-audio-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
 
 .ig-audio-btn:active {
@@ -209,8 +212,8 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
  * ---------------------------------------------------------- */
 
 .ig-audio-volume {
-  width: 18px;              /* comfortable grab area around a thin track */
-  height: 56px;
+  width: 17px;              /* as wide as the knob, so it never clips */
+  height: 87px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -219,10 +222,11 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
   outline: none;
   touch-action: none;       /* the drag must win over page scrolling */
 
-  /* Beat 1 of the idle retreat — see section 2b */
+  /* Beat 1 of the idle retreat — see section 2b.
+     No overflow:hidden — the knob is wider than the track and would be
+     clipped at the extremes of its travel. Opacity does the hiding. */
   opacity: 1;
   margin-bottom: 0;
-  overflow: hidden;
   transition: height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease;
 }
 
@@ -234,10 +238,11 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
 
 .ig-audio-volume-track {
   position: relative;
-  width: 3px;
+  width: 9px;
   height: 100%;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 2px;
+  /* Measured at rgb(112,114,116) over the capsule — white at 30% */
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
 }
 
 .ig-audio-volume-fill {
@@ -246,16 +251,16 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
   bottom: 0;
   width: 100%;
   background: #fff;
-  border-radius: 2px;
+  border-radius: 5px;
 }
 
 .ig-audio-volume-knob {
   position: absolute;
   left: 50%;
-  width: 9px;
-  height: 9px;
-  margin-left: -4.5px;
-  margin-bottom: -4.5px;
+  width: 17px;
+  height: 17px;
+  margin-left: -8.5px;
+  margin-bottom: -8.5px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
@@ -263,7 +268,7 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
 }
 
 .ig-audio-volume:hover .ig-audio-volume-knob {
-  transform: scale(1.25);
+  transform: scale(1.1);
 }
 
 /* ----------------------------------------------------------
