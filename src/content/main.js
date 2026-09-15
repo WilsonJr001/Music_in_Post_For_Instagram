@@ -118,8 +118,7 @@ function reanchorDriftedPlayers() {
     if (!target || target === article || !article.contains(target)) continue;
 
     data.reanchorAttempts = (data.reanchorAttempts || 0) + 1;
-    ensureRelative(target);
-    target.appendChild(data.player);
+    hostPlayer(target, data.player);
     console.log('[IG Audio Enabler] Player drifted outside post, re-anchored:', data.shortcode);
   }
 }

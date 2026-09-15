@@ -12,6 +12,26 @@
 'use strict';
 
 /**
+ * Attach the player to an element and mark that element as its host.
+ *
+ * The marker is what scopes hover. Revealing on `article:hover` meant the
+ * whole post counted, and in view mode an article covers the picture *and*
+ * the caption and comments column, so reading the comments made the
+ * control appear. Only the box the photo occupies should.
+ *
+ * The class travels with the player, because it gets re-anchored when
+ * Instagram recycles a carousel slide or the layout shifts under it.
+ */
+function hostPlayer(target, playerEl) {
+  const previous = playerEl.parentElement;
+  if (previous && previous !== target) previous.classList.remove('ig-audio-host');
+
+  ensureRelative(target);
+  target.classList.add('ig-audio-host');
+  target.appendChild(playerEl);
+}
+
+/**
  * A vertical volume slider, the way Instagram draws its own: a thin track
  * whose fill grows upward and a knob riding the top of it.
  *
@@ -234,9 +254,11 @@ function removePlayerFromArticle(article) {
     playerData.objectUrl = null;
   }
 
-  // Remove DOM element
-  if (playerData.player && playerData.player.parentNode) {
-    playerData.player.remove();
+  // Remove DOM element, and un-mark whatever was hosting it
+  if (playerData.player) {
+    const host = playerData.player.parentElement;
+    if (host) host.classList.remove('ig-audio-host');
+    if (playerData.player.parentNode) playerData.player.remove();
   }
 
   // Unobserve whatever we actually registered (the media container)
@@ -269,8 +291,7 @@ function injectPlayer(article, audioUrl, shortcode, startTime, duration) {
     if (existing) {
       if (existing.player && !existing.player.isConnected) {
         const target = findMediaContainer(article) || article;
-        ensureRelative(target);
-        target.appendChild(existing.player);
+        hostPlayer(target, existing.player);
         console.log('[IG Audio Enabler] Re-anchored player for:', shortcode);
       }
       return;
@@ -461,12 +482,10 @@ function injectPlayer(article, audioUrl, shortcode, startTime, duration) {
     const mediaContainer = findMediaContainer(article);
 
     if (mediaContainer) {
-      ensureRelative(mediaContainer);
-      mediaContainer.appendChild(container);
+      hostPlayer(mediaContainer, container);
     } else {
-      // Fallback: append directly to article
-      ensureRelative(article);
-      article.appendChild(container);
+      // Fallback: the article itself, when nothing better was found
+      hostPlayer(article, container);
     }
 
     // ── Store reference (including segment info for safePlay resets) ──

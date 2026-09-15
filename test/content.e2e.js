@@ -37,6 +37,10 @@ vis.cb([{ target, boundingClientRect: { height: 500 },
           intersectionRect: { height: 500 }, rootBounds: { height: 800 } }]);
 step('visivel + mudo -> continua pausado', entry.audio.paused);
 
+// 2a. hover is scoped to the photo, not the whole post
+step('caixa da foto marcada como host', media.classList.contains('ig-audio-host'));
+step('article NAO e o host', !article.classList.contains('ig-audio-host'));
+
 // 2b. the vertical volume slider reflects the global volume
 const slider = player.querySelector('.ig-audio-volume');
 const fill = slider.querySelector('.ig-audio-volume-fill');

@@ -52,12 +52,11 @@
 
 /* Visible while the audio is following this post */
 .ig-audio-player-container.is-playing,
-/* Show while the post is hovered.
-   Was `*:hover > .ig-audio-player-container`, which only matched when the
-   player's DIRECT parent was hovered — so it went invisible whenever the
-   player was re-anchored to a different container. Scoping to the article
-   makes visibility independent of where the player is attached. */
-article:hover .ig-audio-player-container,
+/* Show while the PHOTO is hovered. Scoped to .ig-audio-host, the element
+   the player is attached to, which player.js keeps marked across every
+   re-anchor. Scoping to the article instead made the control appear when
+   the mouse was anywhere in the post, the comments column included. */
+.ig-audio-host:hover .ig-audio-player-container,
 /* Keep visible while interacting with the player itself */
 .ig-audio-player-container:hover {
   opacity: 1;
@@ -89,13 +88,13 @@ article:hover .ig-audio-player-container,
 }
 
 /* Hover promotes the hint to the real thing */
-article:hover .ig-audio-player-container.is-hinting,
+.ig-audio-host:hover .ig-audio-player-container.is-hinting,
 .ig-audio-player-container.is-hinting:hover {
   opacity: 1;
   transition: opacity 0.2s ease;
 }
 
-article:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
+.ig-audio-host:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
 .ig-audio-player-container.is-hinting:hover .ig-audio-volume {
   height: 87px;
   opacity: 1;
@@ -132,14 +131,14 @@ article:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
 }
 
 /* Hover wins over the idle state and skips the staging */
-article:hover .ig-audio-player-container.is-idle,
+.ig-audio-host:hover .ig-audio-player-container.is-idle,
 .ig-audio-player-container.is-idle:hover {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.2s ease 0s, transform 0.2s ease 0s;
 }
 
-article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
+.ig-audio-host:hover .ig-audio-player-container.is-idle .ig-audio-volume,
 .ig-audio-player-container.is-idle:hover .ig-audio-volume {
   height: 87px;
   opacity: 1;
