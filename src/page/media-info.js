@@ -56,14 +56,29 @@ function rememberAppId(headers) {
 // ──────────────────────────────────────────────────────────
 // Queue a media id for an info lookup
 // ──────────────────────────────────────────────────────────
-function queueMediaInfo(mediaId, shortcode) {
+function queueMediaInfo(mediaId, shortcode, priority) {
   if (!discoveryEnabled) return;
-  if (!mediaId || infoRequested.has(mediaId)) return;
-  if (infoFetchCount >= MAX_INFO_FETCHES) return;
+  if (!mediaId) return;
   if (dispatchedShortcodes.has(shortcode) || videoShortcodes.has(shortcode)) return;
 
+  // Already waiting its turn. If it has since come on screen, move it to
+  // the front: the post being looked at should not sit behind ones queued
+  // ahead of it on the guess that scrolling would continue.
+  const waiting = infoQueue.findIndex((entry) => entry.mediaId === mediaId);
+  if (waiting !== -1) {
+    if (priority === 'now' && waiting > 0) {
+      infoQueue.unshift(infoQueue.splice(waiting, 1)[0]);
+    }
+    return;
+  }
+
+  if (infoRequested.has(mediaId)) return;
+  if (infoFetchCount >= MAX_INFO_FETCHES) return;
+
   infoRequested.add(mediaId);
-  infoQueue.push({ mediaId, shortcode });
+  if (priority === 'now') infoQueue.unshift({ mediaId, shortcode });
+  else infoQueue.push({ mediaId, shortcode });
+
   drainInfoQueue();
 }
 
@@ -129,6 +144,7 @@ document.addEventListener('IG_AUDIO_REQUEST', function (e) {
     // content.js can recover the id from the post's image URLs when we
     // never saw the payload (server-rendered posts)
     const domMediaId = (detail && typeof detail === 'object') ? detail.mediaId : null;
+    const priority = (detail && typeof detail === 'object' && detail.priority) || 'now';
     if (dispatchedShortcodes.has(shortcode) || videoShortcodes.has(shortcode)) return;
 
     const mediaId = shortcodeToMediaId.get(shortcode) || domMediaId;
@@ -139,7 +155,7 @@ document.addEventListener('IG_AUDIO_REQUEST', function (e) {
     if (!shortcodeToMediaId.has(shortcode)) {
       console.log('[IG Audio Enabler] Using media id from DOM for:', shortcode, mediaId);
     }
-    queueMediaInfo(mediaId, shortcode);
+    queueMediaInfo(mediaId, shortcode, priority);
   } catch (err) {
     console.warn('[IG Audio Enabler] Error handling IG_AUDIO_REQUEST:', err);
   }

@@ -62,6 +62,14 @@ const discoveryObserved = new WeakSet();
  */
 let discoveryEnabled = true;
 
+/**
+ * How far below the fold to start asking, in pixels. Scrolling a feed is
+ * a continuous motion, so a post a screen and a half down is very likely
+ * the next one looked at. Asking early means its track is already in hand
+ * when it arrives instead of after a round trip.
+ */
+const PREFETCH_MARGIN_PX = 1200;
+
 /** Shortcodes we have already asked inject.js about */
 const infoAsked = new Set();
 

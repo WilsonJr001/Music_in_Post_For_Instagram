@@ -15,6 +15,7 @@ const SUITES = [
   ['content script, end to end', 'content.e2e.js'],
   ['page world, on-demand lookup', 'page.ondemand.js'],
   ['player anchoring', 'anchor.test.js'],
+  ['request ordering', 'queue.test.js'],
 ];
 
 let failed = 0;

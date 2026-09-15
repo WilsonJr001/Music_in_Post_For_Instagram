@@ -44,7 +44,7 @@ const discoveryObserver = new IntersectionObserver(
       infoAsked.add(shortcode);
       discoveryObserver.unobserve(article);
 
-      dispatchInfoRequest(shortcode, mediaIdFromDom(article));
+      dispatchInfoRequest(shortcode, mediaIdFromDom(article), 'now');
     }
   },
   { threshold: Array.from({ length: 11 }, (_, i) => i / 10) }
@@ -60,12 +60,14 @@ const discoveryObserver = new IntersectionObserver(
  * bare string still crosses cleanly — primitives need no wrapper — so
  * inject.js accepts either shape.
  */
-function dispatchInfoRequest(shortcode, mediaId) {
+function dispatchInfoRequest(shortcode, mediaId, priority) {
   let detail = shortcode;
 
   try {
     if (typeof cloneInto === 'function') {
-      detail = cloneInto({ shortcode, mediaId: mediaId || null }, window);
+      detail = cloneInto(
+        { shortcode, mediaId: mediaId || null, priority: priority || 'now' },
+        window);
     }
   } catch (err) {
     detail = shortcode; // fall back to the primitive
@@ -77,5 +79,45 @@ function dispatchInfoRequest(shortcode, mediaId) {
 function registerForDiscovery(article) {
   if (discoveryObserved.has(article)) return;
   discoveryObserved.add(article);
+
   discoveryObserver.observe(article);
+  prefetchObserver.observe(article);
 }
+
+/**
+ * Look ahead.
+ *
+ * The observer above only reacts once a post is on screen, which means the
+ * track arrives a round trip late. This one watches a band below the fold
+ * and asks early, so by the time a post is scrolled to, its audio is
+ * usually already known.
+ *
+ * These go in as low priority: if a post reaches the screen while still
+ * queued, the request above jumps it to the front. The same per-media and
+ * per-page-load caps apply, and the band is bounded, so this changes when
+ * requests happen rather than how many.
+ */
+const prefetchObserver = new IntersectionObserver(
+  (entries) => {
+    if (!discoveryEnabled) return;
+
+    for (const entry of entries) {
+      const article = entry.target;
+      if (!entry.isIntersecting || !article.isConnected) continue;
+      if (article.querySelector('video')) continue;
+
+      const shortcode = shortcodeOf(article);
+      if (!shortcode) continue;
+
+      if (audioDataMap.has(shortcode) || infoAsked.has(shortcode)) {
+        prefetchObserver.unobserve(article);
+        continue;
+      }
+
+      infoAsked.add(shortcode);
+      prefetchObserver.unobserve(article);
+      dispatchInfoRequest(shortcode, mediaIdFromDom(article), 'ahead');
+    }
+  },
+  { rootMargin: `0px 0px ${PREFETCH_MARGIN_PX}px 0px`, threshold: 0 }
+);
