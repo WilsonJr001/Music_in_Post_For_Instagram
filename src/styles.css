@@ -1,0 +1,306 @@
+/* ============================================================
+ * Instagram Photo Audio Enabler — Floating Audio Player Styles
+ * ============================================================
+ * A minimal, non-intrusive player that overlays Instagram photo
+ * posts. Uses glassmorphism / dark-translucent aesthetics to
+ * blend naturally with Instagram's native dark UI.
+ * ============================================================ */
+
+/* ----------------------------------------------------------
+ * 1. Player Container
+ * ---------------------------------------------------------- */
+
+.ig-audio-player-container {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 6px 12px;
+
+  /* Hidden by default — revealed on hover or when playing */
+  opacity: 0;
+  transform: translateY(4px);
+  /* Also governs the muted hint's fade-OUT, since removing .is-hinting
+     drops the element back to this rule. Unhurried on purpose. */
+  transition: opacity 0.7s ease, transform 0.7s ease;
+
+  pointer-events: auto;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+}
+
+/* ----------------------------------------------------------
+ * 2. Show / Hide Logic
+ * ---------------------------------------------------------- */
+
+/* Visible while the audio is following this post */
+.ig-audio-player-container.is-playing,
+/* Show while the post is hovered.
+   Was `*:hover > .ig-audio-player-container`, which only matched when the
+   player's DIRECT parent was hovered — so it went invisible whenever the
+   player was re-anchored to a different container. Scoping to the article
+   makes visibility independent of where the player is attached. */
+article:hover .ig-audio-player-container,
+/* Keep visible while interacting with the player itself */
+.ig-audio-player-container:hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----------------------------------------------------------
+ * 2a. Muted hint — "this photo has a track"
+ * ----------------------------------------------------------
+ * A muted player is silent and, without this, invisible until you happen
+ * to hover it — so there is nothing telling you the photo has audio at
+ * all. On arrival it shows itself briefly: just the small icon, held at
+ * partial opacity so it reads as a marker rather than a control, then it
+ * withdraws. Hovering still brings back the full player.
+ * ---------------------------------------------------------- */
+
+.ig-audio-player-container.is-hinting {
+  opacity: 0.55;
+  transform: translateY(0);
+  transition: opacity 0.6s ease;
+}
+
+/* Icon only while hinting — the slider would make it a control */
+.ig-audio-player-container.is-hinting .ig-audio-volume {
+  width: 0;
+  opacity: 0;
+  margin-left: -8px;
+  pointer-events: none;
+}
+
+/* Hover promotes the hint to the real thing */
+article:hover .ig-audio-player-container.is-hinting,
+.ig-audio-player-container.is-hinting:hover {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+article:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
+.ig-audio-player-container.is-hinting:hover .ig-audio-volume {
+  width: 50px;
+  opacity: 1;
+  margin-left: 0;
+  pointer-events: auto;
+}
+
+/* ----------------------------------------------------------
+ * 2b. Idle retreat — two staged movements
+ * ----------------------------------------------------------
+ * A short while after the player becomes active it gets out of the way,
+ * in two beats so the eye can follow what is happening rather than
+ * watching the whole thing blink out at once:
+ *
+ *   beat 1 (0ms)    the volume slider collapses to nothing
+ *   beat 2 (+260ms) the remaining pill fades away
+ *
+ * Hovering the post reverses both at once, with no delay, so it comes
+ * back immediately instead of replaying the sequence backwards.
+ * ---------------------------------------------------------- */
+
+.ig-audio-player-container.is-idle .ig-audio-volume {
+  width: 0;
+  opacity: 0;
+  margin-left: -8px; /* absorbs the flex gap so the pill closes up */
+  pointer-events: none;
+}
+
+.ig-audio-player-container.is-idle {
+  opacity: 0;
+  transform: translateY(4px);
+  /* Wait out the slider collapse before starting to fade */
+  transition: opacity 0.45s ease 0.26s, transform 0.45s ease 0.26s;
+}
+
+/* Hover wins over the idle state and skips the staging */
+article:hover .ig-audio-player-container.is-idle,
+.ig-audio-player-container.is-idle:hover {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease 0s, transform 0.2s ease 0s;
+}
+
+article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
+.ig-audio-player-container.is-idle:hover .ig-audio-volume {
+  width: 50px;
+  opacity: 1;
+  margin-left: 0;
+  pointer-events: auto;
+}
+
+/* Muted is the resting state: keep the badge readable but quiet, so it
+   reads as "there is a track here" rather than demanding attention. */
+.ig-audio-player-container.is-muted {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* :not(.is-idle) matters — without it this rule has the same specificity
+   as the idle collapse above but comes later, so the dimmed slider would
+   win and leave a sliver visible during the retreat. */
+.ig-audio-player-container.is-muted:not(.is-idle):not(.is-hinting) .ig-audio-volume {
+  opacity: 0.4;
+}
+
+/* ----------------------------------------------------------
+ * 3. Sound Toggle Button
+ * ---------------------------------------------------------- */
+
+.ig-audio-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+  line-height: 1;
+}
+
+.ig-audio-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.ig-audio-btn:active {
+  transform: scale(0.95);
+}
+
+/* ----------------------------------------------------------
+ * 4. Volume Slider (input[type="range"])
+ * ---------------------------------------------------------- */
+
+.ig-audio-volume {
+  width: 50px;
+  height: 3px;
+
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+
+  /* Beat 1 of the idle retreat — see section 2b */
+  opacity: 1;
+  margin-left: 0;
+  transition: width 0.25s ease, opacity 0.25s ease, margin-left 0.25s ease;
+}
+
+/* WebKit thumb */
+.ig-audio-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ig-audio-volume:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Firefox thumb */
+.ig-audio-volume::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ig-audio-volume:hover::-moz-range-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.ig-audio-volume::-moz-range-track {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  height: 3px;
+  border: none;
+}
+
+/* ----------------------------------------------------------
+ * 5. Pulse Animation — Playing State
+ * ---------------------------------------------------------- */
+
+@keyframes ig-audio-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(225, 48, 108, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(225, 48, 108, 0);
+  }
+}
+
+.ig-audio-player-container.is-playing:not(.is-muted) .ig-audio-btn {
+  animation: ig-audio-pulse 2s ease infinite;
+}
+
+/* ----------------------------------------------------------
+ * 6. Reduced motion — keep the states, drop the choreography
+ * ---------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ig-audio-player-container,
+  .ig-audio-player-container.is-idle,
+  .ig-audio-player-container.is-hinting,
+  .ig-audio-volume,
+  .ig-audio-btn {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+
+  .ig-audio-player-container.is-playing .ig-audio-btn,
+  .ig-audio-player-container.is-playing:not(.is-muted) .ig-audio-btn {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------
+ * 7. Responsive — Hide volume on very small containers
+ * ---------------------------------------------------------- */
+
+@container (max-width: 200px) {
+  .ig-audio-volume {
+    display: none;
+  }
+}
+
+/* Fallback for browsers without container query support */
+@media (max-width: 200px) {
+  .ig-audio-volume {
+    display: none;
+  }
+}
