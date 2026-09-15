@@ -14,6 +14,8 @@ function makeEl(tag, attrs = {}) {
     getAttribute: (n) => (n in attrs ? attrs[n] : null),
     setAttribute: (n, v) => { attrs[n] = v; },
     appendChild: (c) => { c.parentElement = el; el.children.push(c); return c; },
+    replaceChildren: (...kids) => { el.children = []; kids.forEach(k => {
+      k.parentElement = el; el.children.push(k); }); },
     remove() { if (el.parentElement) el.parentElement.children =
       el.parentElement.children.filter(c => c !== el); el.isConnected = false; },
     _handlers: {},
@@ -61,6 +63,7 @@ const sandbox = {
     removeEventListener: () => {},
     dispatchEvent: (e) => { (listeners[e.type] || []).forEach(fn => fn(e)); return true; },
     createElement: (t) => makeEl(t),
+    createElementNS: (ns, t) => makeEl(t),
     querySelectorAll: (sel) => body.querySelectorAll(sel),
   },
   CustomEvent: class { constructor(t, i) { this.type = t; this.detail = i && i.detail; } },

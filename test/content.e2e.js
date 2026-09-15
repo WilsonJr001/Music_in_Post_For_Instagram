@@ -39,14 +39,21 @@ step('visivel + mudo -> continua pausado', entry.audio.paused);
 
 // 3. user clicks the sound button
 const btn = player.querySelector('.ig-audio-btn');
+const icon = () => { const svg = btn.children[0];
+  return svg && svg._attrs.viewBox; };
+step('icone mudo = viewBox 48 (Instagram)', icon() === '0 0 48 48');
+step('rotulo acessivel', btn.getAttribute('aria-label'));
 btn.fire('click');
 step('apos clicar em ativar som -> tocando', !entry.audio.paused);
 step('audio desmutado', !entry.audio.muted);
 step('posicao no trecho (segStart=12)', entry.audio.currentTime);
+step('icone trocou para com som (viewBox 24)', icon() === '0 0 24 24');
+step('rotulo acompanhou', btn.getAttribute('aria-label'));
 
 // 4. click again -> silence
 btn.fire('click');
 step('apos mutar -> pausado', entry.audio.paused);
+step('icone voltou para mudo', icon() === '0 0 48 48');
 
 console.log('\nlogs:');
 logs.forEach(l => console.log('   ' + l.replace(/https:\/\/\S+/, '<url>')));

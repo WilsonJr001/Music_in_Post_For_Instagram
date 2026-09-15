@@ -107,6 +107,12 @@ not persisted: reopening Instagram should never land on a post already
 playing out loud. Volume is a level rather than a trigger, so that one is
 remembered.
 
+The sound button uses Instagram's own volume glyphs, lifted from the markup
+it renders for video posts, so the control reads as part of the page. They
+are drawn with `createElementNS` rather than assigned as markup, and the
+two states use different viewBoxes (48 for muted, 24 for unmuted) because
+Instagram ships them that way.
+
 ## Anchoring the player
 
 Instagram's carousel is a horizontal scroll-snap container. A

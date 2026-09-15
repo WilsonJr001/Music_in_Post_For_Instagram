@@ -12,6 +12,68 @@
 'use strict';
 
 /**
+ * Instagram's own volume glyphs, so the control reads as part of the page
+ * rather than as something bolted on. Taken from the markup Instagram
+ * renders for video posts; the two use different viewBoxes, which is why
+ * each carries its own.
+ */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const SOUND_ICONS = {
+  on: {
+    viewBox: '0 0 24 24',
+    evenOdd: false,
+    d: 'M16.636 7.028a1.5 1.5 0 10-2.395 1.807 5.365 5.365 0 011.103 3.17 5.378 '
+     + '5.378 0 01-1.105 3.176 1.5 1.5 0 102.395 1.806 8.396 8.396 0 '
+     + '001.71-4.981 8.39 8.39 0 00-1.708-4.978zm3.73-2.332A1.5 1.5 0 1018.04 '
+     + '6.59 8.823 8.823 0 0120 12.007a8.798 8.798 0 01-1.96 5.415 1.5 1.5 0 '
+     + '002.326 1.894 11.672 11.672 0 002.635-7.31 11.682 11.682 0 '
+     + '00-2.635-7.31zm-8.963-3.613a1.001 1.001 0 00-1.082.187L5.265 6H2a1 1 0 '
+     + '00-1 1v10.003a1 1 0 001 1h3.265l5.01 4.682.02.021a1 1 0 '
+     + '001.704-.814L12.005 2a1 1 0 00-.602-.917z',
+  },
+  off: {
+    viewBox: '0 0 48 48',
+    evenOdd: true,
+    d: 'M1.5 13.3c-.8 0-1.5.7-1.5 1.5v18.4c0 .8.7 1.5 1.5 1.5h8.7l12.9 12.9c.9.9 '
+     + '2.5.3 2.5-1v-9.8c0-.4-.2-.8-.4-1.1l-22-22c-.3-.3-.7-.4-1.1-.4h-.6zm46.8 '
+     + '31.4-5.5-5.5C44.9 36.6 48 31.4 48 24c0-11.4-7.2-17.4-7.2-17.4-.6-.6-1.6-.6-2.2 '
+     + '0L37.2 8c-.6.6-.6 1.6 0 2.2 0 0 5.7 5 5.7 13.8 0 5.4-2.1 9.3-3.8 11.6L35.5 '
+     + '32c1.1-1.7 2.3-4.4 2.3-8 0-6.8-4.1-10.3-4.1-10.3-.6-.6-1.6-.6-2.2 0l-1.4 '
+     + '1.4c-.6.6-.6 1.6 0 2.2 0 0 2.6 2 2.6 6.7 0 1.8-.4 3.2-.9 4.3L25.5 '
+     + '22V1.4c0-1.3-1.6-1.9-2.5-1L13.5 10 3.3-.3c-.6-.6-1.5-.6-2.1 0L-.2 '
+     + '1.1c-.6.6-.6 1.5 0 2.1L4 7.6l26.8 26.8 13.9 13.9c.6.6 1.5.6 2.1 0l1.4-1.4c.7-.6.7-1.6.1-2.2z',
+  },
+};
+
+/** Build a fresh icon element for the given sound state */
+function buildSoundIcon(enabled) {
+  const spec = enabled ? SOUND_ICONS.on : SOUND_ICONS.off;
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', spec.viewBox);
+  svg.setAttribute('fill', 'currentColor');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', spec.d);
+  if (spec.evenOdd) {
+    path.setAttribute('fill-rule', 'evenodd');
+    path.setAttribute('clip-rule', 'evenodd');
+  }
+
+  svg.appendChild(path);
+  return svg;
+}
+
+/** Swap the button's glyph, and keep its label honest for screen readers */
+function setButtonIcon(btn, enabled) {
+  btn.replaceChildren(buildSoundIcon(enabled));
+  btn.setAttribute('aria-label', enabled ? 'Silenciar' : 'Ativar som');
+  btn.title = enabled ? 'Silenciar' : 'Ativar som';
+}
+
+/**
  * Flash the badge so a muted post still announces that it has a track.
  * Without this the only way to discover the audio is to happen to hover
  * the photo, since nothing plays and the player sits at opacity 0.
@@ -238,8 +300,7 @@ function injectPlayer(article, audioUrl, shortcode, startTime, duration) {
     // ── Play/Pause Button ──
     const playBtn = document.createElement('div');
     playBtn.className = 'ig-audio-btn';
-    playBtn.textContent = soundEnabled ? '🔊' : '🔇';
-    playBtn.title = soundEnabled ? 'Silenciar' : 'Ativar som';
+    setButtonIcon(playBtn, soundEnabled);
 
     // The button is a SOUND toggle, not play/pause: playback itself is
     // driven by which post you are looking at. Clicking is a user gesture,
@@ -369,8 +430,7 @@ function updateButtonState(article, isPlaying) {
   const btn = container.querySelector('.ig-audio-btn');
   if (!btn) return;
 
-  btn.textContent = soundEnabled ? '🔊' : '🔇';
-  btn.title = soundEnabled ? 'Silenciar' : 'Ativar som';
+  setButtonIcon(btn, soundEnabled);
 
   // "Playing" here means this is the post the audio is following. The
   // badge stays visible so you can see that a track is attached and

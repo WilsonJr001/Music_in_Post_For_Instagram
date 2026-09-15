@@ -167,7 +167,6 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
   background: rgba(255, 255, 255, 0.15);
   border: none;
   color: #fff;
-  font-size: 14px;
 
   cursor: pointer;
 
@@ -177,6 +176,15 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
 
   transition: background 0.2s ease, transform 0.15s ease;
   line-height: 1;
+}
+
+/* Instagram ships these glyphs at 12px inside a larger hit area; 16 suits
+   the 28px button here. currentColor keeps them on the button's color. */
+.ig-audio-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  pointer-events: none;
 }
 
 .ig-audio-btn:hover {
