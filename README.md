@@ -42,6 +42,20 @@ a post to bring it back. Click 🔇 to turn sound on; the choice applies to
 every post and the volume is remembered between visits. The unmuted state
 is not — closing Instagram and reopening it starts quiet.
 
+## Choosing when it asks
+
+Because the feed hides the audio, playing music while you scroll means
+asking Instagram about posts as they reach the screen. That is a request
+per post looked at, and most come back with nothing. The options page
+(`about:addons` -> this extension -> Preferences) offers both behaviours:
+
+- **While scrolling the feed** (default) - looks posts up as they appear.
+  This is what makes feed playback work.
+- **Only when a photo is opened** - makes no requests of its own and only
+  reads what Instagram fetches anyway, the way earlier versions behaved.
+
+Open tabs pick up the change immediately.
+
 ## How it works
 
 Instagram withholds the audio from the feed entirely and only sends it when

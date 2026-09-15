@@ -11,6 +11,12 @@
  */
 'use strict';
 
+/**
+ * Mirrors the content script's discovery setting. Enforced here as well, so
+ * that turning it off stops the requests at the point they are made.
+ */
+let discoveryEnabled = true;
+
 /** Media ids already requested (or queued), so we ask at most once */
 const infoRequested = new Set();
 
@@ -51,6 +57,7 @@ function rememberAppId(headers) {
 // Queue a media id for an info lookup
 // ──────────────────────────────────────────────────────────
 function queueMediaInfo(mediaId, shortcode) {
+  if (!discoveryEnabled) return;
   if (!mediaId || infoRequested.has(mediaId)) return;
   if (infoFetchCount >= MAX_INFO_FETCHES) return;
   if (dispatchedShortcodes.has(shortcode) || videoShortcodes.has(shortcode)) return;
@@ -136,4 +143,10 @@ document.addEventListener('IG_AUDIO_REQUEST', function (e) {
   } catch (err) {
     console.warn('[IG Audio Enabler] Error handling IG_AUDIO_REQUEST:', err);
   }
+});
+
+document.addEventListener('IG_AUDIO_CONFIG', function (e) {
+  const detail = e.detail;
+  if (!detail) return;
+  discoveryEnabled = detail.discoveryEnabled !== false;
 });

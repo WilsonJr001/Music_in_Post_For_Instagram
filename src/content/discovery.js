@@ -39,6 +39,8 @@ const discoveryObserver = new IntersectionObserver(
         continue;
       }
 
+      if (!discoveryEnabled) continue; // listener-only mode, see state.js
+
       infoAsked.add(shortcode);
       discoveryObserver.unobserve(article);
 

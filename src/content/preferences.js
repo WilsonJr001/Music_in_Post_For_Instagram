@@ -74,3 +74,45 @@ function setSoundEnabled(enabled) {
 
   console.log('[IG Audio Enabler] Sound', enabled ? 'ON' : 'OFF (muted)');
 }
+
+/**
+ * Discovery mode lives in extension storage rather than localStorage: it is
+ * set from the options page, which runs in a different context and has no
+ * access to the page's storage.
+ */
+function loadDiscoveryPreference() {
+  if (typeof browser === 'undefined' || !browser.storage) return;
+
+  browser.storage.local.get({ discoveryEnabled: true }).then((stored) => {
+    setDiscoveryEnabled(stored.discoveryEnabled !== false);
+  }).catch(() => {
+    // Storage unavailable — keep the default
+  });
+
+  // Apply a change from the options page without needing a reload
+  if (browser.storage.onChanged) {
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'local' || !changes.discoveryEnabled) return;
+      setDiscoveryEnabled(changes.discoveryEnabled.newValue !== false);
+    });
+  }
+}
+
+function setDiscoveryEnabled(enabled) {
+  discoveryEnabled = enabled;
+
+  // The page world enforces this too, so a stale content script cannot
+  // leave requests going after the setting is turned off.
+  let detail = { discoveryEnabled: enabled };
+  try {
+    if (typeof cloneInto === 'function') detail = cloneInto(detail, window);
+  } catch (err) {
+    detail = { discoveryEnabled: enabled };
+  }
+  document.dispatchEvent(new CustomEvent('IG_AUDIO_CONFIG', { detail }));
+
+  console.log('[IG Audio Enabler] Discovery',
+    enabled ? 'ON (asks about posts on screen)' : 'OFF (listens only)');
+}
+
+loadDiscoveryPreference();

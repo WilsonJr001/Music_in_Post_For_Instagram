@@ -48,7 +48,23 @@ setTimeout(() => {
               requested.filter(u => String(u).includes('/info/')).length);
 
   // 2) content.js says the post is on screen
-  sb.document.dispatchEvent(new sb.CustomEvent('IG_AUDIO_REQUEST', { detail: { shortcode: 'Dcja237lhkA' } }));
+  // Listener-only mode: the same request must produce nothing at all
+  sb.document.dispatchEvent(new sb.CustomEvent('IG_AUDIO_CONFIG',
+    { detail: { discoveryEnabled: false } }));
+  sb.document.dispatchEvent(new sb.CustomEvent('IG_AUDIO_REQUEST',
+    { detail: { shortcode: 'Dcja237lhkA' } }));
+
+  setTimeout(() => {
+    const quiet = requested.filter(u => String(u).includes('/info/')).length;
+    console.log('modo so-ouvinte -> requisicoes /info/:', quiet,
+                quiet === 0 ? '(correto)' : '(ERRO: deveria ser 0)');
+
+    // Back to the normal mode for the rest of the check
+    sb.document.dispatchEvent(new sb.CustomEvent('IG_AUDIO_CONFIG',
+      { detail: { discoveryEnabled: true } }));
+    sb.document.dispatchEvent(new sb.CustomEvent('IG_AUDIO_REQUEST',
+      { detail: { shortcode: 'Dcja237lhkA' } }));
+  }, 80);
 
   setTimeout(() => {
     console.log('\napos o post entrar na tela:');
@@ -56,5 +72,5 @@ setTimeout(() => {
     logs.filter(l => l.includes('IG Audio') && !l.includes('loaded')).forEach(l =>
       console.log('   ' + l.replace(/https:\/\/\S+/, '<url>')));
     console.log('\ndespachado:', JSON.stringify(dispatched));
-  }, 300);
+  }, 400);
 }, 150);

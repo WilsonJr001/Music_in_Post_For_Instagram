@@ -62,7 +62,12 @@ have made — but only for posts that actually reach the screen:
    `IG_AUDIO_FOUND`.
 
 Requests are serialised, one media id is asked at most once, and there is a
-hard cap per page load. Expect roughly a 1-in-3 hit rate: most photos have
+hard cap per page load. The whole behaviour is also a setting: the options
+page can switch the extension back to reading only what Instagram fetches
+on its own, in which case the feed stays silent and audio appears when a
+post is opened. The flag is enforced twice, in `content/discovery.js` before
+a request is asked for and in `page/media-info.js` before one is made, so a
+content script that missed the change cannot leave requests running. Expect roughly a 1-in-3 hit rate: most photos have
 no music and there is no way to know beforehand.
 
 Getting the media id has two sources. Normally the page world recorded
@@ -148,6 +153,7 @@ re-anchored one level up and logs `Player drifted outside post`.
 | `src/content/playback.js` | what plays, and when |
 | `src/content/discovery.js` | asking the page world for metadata |
 | `src/content/main.js` | bootstrap |
+| `src/options/` | the options page |
 
 Load order is the order in `manifest.json`. All files in a world share one
 scope, so names are visible across files without any module plumbing.

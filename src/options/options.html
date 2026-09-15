@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Instagram Photo Audio Enabler</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <h1>Áudio em fotos do Instagram</h1>
+
+  <fieldset>
+    <legend>Quando buscar a música</legend>
+
+    <label class="option">
+      <input type="radio" name="mode" value="active">
+      <span class="title">Navegando pelo feed</span>
+      <span class="detail">
+        Consulta o Instagram sobre os posts que aparecem na tela. É o que faz
+        a música tocar enquanto você rola o feed. Custa uma requisição por
+        post visto, e a maioria volta sem música, porque o feed não informa
+        quais fotos têm faixa.
+      </span>
+    </label>
+
+    <label class="option">
+      <input type="radio" name="mode" value="listener">
+      <span class="title">Só ao abrir a foto</span>
+      <span class="detail">
+        Nenhuma requisição própria. A extensão apenas lê o que o Instagram
+        já busca sozinho, então a música aparece quando você abre um post,
+        nunca ao rolar o feed.
+      </span>
+    </label>
+  </fieldset>
+
+  <p class="saved" id="saved" hidden>Salvo.</p>
+
+  <p class="note">
+    Vale para as duas metades da extensão. Abas já abertas aplicam a mudança
+    na hora, sem recarregar.
+  </p>
+
+  <script src="options.js"></script>
+</body>
+</html>

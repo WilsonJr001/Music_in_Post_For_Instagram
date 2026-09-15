@@ -9,14 +9,23 @@
       "strict_min_version": "128.0"
     }
   },
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "*://*.instagram.com/*",
     "*://*.cdninstagram.com/*",
     "*://*.fbcdn.net/*"
   ],
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": false
+  },
   "content_scripts": [
     {
-      "matches": ["*://*.instagram.com/*"],
+      "matches": [
+        "*://*.instagram.com/*"
+      ],
       "world": "MAIN",
       "run_at": "document_start",
       "js": [
@@ -27,9 +36,13 @@
       ]
     },
     {
-      "matches": ["*://*.instagram.com/*"],
+      "matches": [
+        "*://*.instagram.com/*"
+      ],
       "run_at": "document_start",
-      "css": ["src/styles.css"],
+      "css": [
+        "src/styles.css"
+      ],
       "js": [
         "src/content/state.js",
         "src/content/preferences.js",

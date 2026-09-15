@@ -53,6 +53,15 @@ const SHORTCODE_REGEX = /\/(p|reel|reels)\/([A-Za-z0-9_-]+)/;
 /** Articles already handed to the discovery observer */
 const discoveryObserved = new WeakSet();
 
+/**
+ * Discovery mode. When true the extension asks Instagram for the audio of
+ * posts that reach the screen, which is what makes the feed work at the
+ * cost of one request per post looked at. When false it only reads
+ * responses Instagram fetches on its own, so audio appears when you open a
+ * post and never while scrolling. Set on the options page.
+ */
+let discoveryEnabled = true;
+
 /** Shortcodes we have already asked inject.js about */
 const infoAsked = new Set();
 
