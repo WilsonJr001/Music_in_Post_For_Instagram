@@ -96,7 +96,8 @@ sandbox.window.fetch = () => Promise.resolve({ ok: true, blob: () => Promise.res
 vm.createContext(sandbox);
 const EPILOGUE = `
 ;globalThis.__t = { audioDataMap, activePlayers, soundEnabled, globalVolume,
-  tryAttachPlayers, selectActivePost, setSoundEnabled, injectPlayer };
+  tryAttachPlayers, selectActivePost, setSoundEnabled, setGlobalVolume,
+  volumeFromPointer, injectPlayer };
 `;
 vm.runInContext(BUNDLE.content() + EPILOGUE, sandbox, { filename: 'content-bundle.js' });
 

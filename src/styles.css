@@ -17,6 +17,7 @@
   z-index: 10;
 
   display: flex;
+  flex-direction: column;   /* volume above the button, as Instagram stacks it */
   align-items: center;
   gap: 8px;
 
@@ -76,186 +77,72 @@ article:hover .ig-audio-player-container,
 }
 
 /* Icon only while hinting — the slider would make it a control */
-.ig-audio-player-container.is-hinting .ig-audio-volume {
-  width: 0;
-  opacity: 0;
-  margin-left: -8px;
-  pointer-events: none;
-}
-
-/* Hover promotes the hint to the real thing */
-article:hover .ig-audio-player-container.is-hinting,
-.ig-audio-player-container.is-hinting:hover {
-  opacity: 1;
-  transition: opacity 0.2s ease;
-}
-
-article:hover .ig-audio-player-container.is-hinting .ig-audio-volume,
-.ig-audio-player-container.is-hinting:hover .ig-audio-volume {
-  width: 50px;
-  opacity: 1;
-  margin-left: 0;
-  pointer-events: auto;
-}
-
-/* ----------------------------------------------------------
- * 2b. Idle retreat — two staged movements
+.ig-audio-player-container.is-hinting /* ----------------------------------------------------------
+ * 4. Volume — a vertical track that fills upward
  * ----------------------------------------------------------
- * A short while after the player becomes active it gets out of the way,
- * in two beats so the eye can follow what is happening rather than
- * watching the whole thing blink out at once:
- *
- *   beat 1 (0ms)    the volume slider collapses to nothing
- *   beat 2 (+260ms) the remaining pill fades away
- *
- * Hovering the post reverses both at once, with no delay, so it comes
- * back immediately instead of replaying the sequence backwards.
- * ---------------------------------------------------------- */
-
-.ig-audio-player-container.is-idle .ig-audio-volume {
-  width: 0;
-  opacity: 0;
-  margin-left: -8px; /* absorbs the flex gap so the pill closes up */
-  pointer-events: none;
-}
-
-.ig-audio-player-container.is-idle {
-  opacity: 0;
-  transform: translateY(4px);
-  /* Wait out the slider collapse before starting to fade */
-  transition: opacity 0.45s ease 0.26s, transform 0.45s ease 0.26s;
-}
-
-/* Hover wins over the idle state and skips the staging */
-article:hover .ig-audio-player-container.is-idle,
-.ig-audio-player-container.is-idle:hover {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.2s ease 0s, transform 0.2s ease 0s;
-}
-
-article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
-.ig-audio-player-container.is-idle:hover .ig-audio-volume {
-  width: 50px;
-  opacity: 1;
-  margin-left: 0;
-  pointer-events: auto;
-}
-
-/* Muted is the resting state: keep the badge readable but quiet, so it
-   reads as "there is a track here" rather than demanding attention. */
-.ig-audio-player-container.is-muted {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-/* :not(.is-idle) matters — without it this rule has the same specificity
-   as the idle collapse above but comes later, so the dimmed slider would
-   win and leave a sliver visible during the retreat. */
-.ig-audio-player-container.is-muted:not(.is-idle):not(.is-hinting) .ig-audio-volume {
-  opacity: 0.4;
-}
-
-/* ----------------------------------------------------------
- * 3. Sound Toggle Button
- * ---------------------------------------------------------- */
-
-.ig-audio-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: #fff;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: background 0.2s ease, transform 0.15s ease;
-  line-height: 1;
-}
-
-/* Instagram ships these glyphs at 12px inside a larger hit area; 16 suits
-   the 28px button here. currentColor keeps them on the button's color. */
-.ig-audio-btn svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-  pointer-events: none;
-}
-
-.ig-audio-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
-
-.ig-audio-btn:active {
-  transform: scale(0.95);
-}
-
-/* ----------------------------------------------------------
- * 4. Volume Slider (input[type="range"])
+ * Rebuilt rather than styled from <input type="range">: vertical range
+ * inputs need vendor-specific hacks that behave differently per engine,
+ * and the collapse animation needs a height this code controls.
  * ---------------------------------------------------------- */
 
 .ig-audio-volume {
-  width: 50px;
-  height: 3px;
+  width: 18px;              /* comfortable grab area around a thin track */
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 
-  -webkit-appearance: none;
-  appearance: none;
-
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 2px;
-  outline: none;
   cursor: pointer;
+  outline: none;
+  touch-action: none;       /* let the drag win over page scrolling */
 
   /* Beat 1 of the idle retreat — see section 2b */
   opacity: 1;
-  margin-left: 0;
-  transition: width 0.25s ease, opacity 0.25s ease, margin-left 0.25s ease;
+  margin-bottom: 0;
+  overflow: hidden;
+  transition: height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease;
 }
 
-/* WebKit thumb */
-.ig-audio-volume::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.ig-audio-volume:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.ig-audio-volume:hover::-webkit-slider-thumb {
-  transform: scale(1.25);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-/* Firefox thumb */
-.ig-audio-volume::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  border: none;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ig-audio-volume:hover::-moz-range-thumb {
-  transform: scale(1.25);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.ig-audio-volume::-moz-range-track {
+.ig-audio-volume-track {
+  position: relative;
+  width: 3px;
+  height: 100%;
   background: rgba(255, 255, 255, 0.25);
   border-radius: 2px;
-  height: 3px;
-  border: none;
+}
+
+/* Grows from the bottom up, mirroring Instagram's height: X% fill */
+.ig-audio-volume-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 2px;
+}
+
+/* Rides the top of the fill, as Instagram positions its knob at bottom: X% */
+.ig-audio-volume-knob {
+  position: absolute;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  margin-bottom: -4.5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.ig-audio-volume:hover .ig-audio-volume-knob {
+  transform: scale(1.25);
 }
 
 /* ----------------------------------------------------------
@@ -300,14 +187,14 @@ article:hover .ig-audio-player-container.is-idle .ig-audio-volume,
  * 7. Responsive — Hide volume on very small containers
  * ---------------------------------------------------------- */
 
-@container (max-width: 200px) {
+@container (max-height: 160px) {
   .ig-audio-volume {
     display: none;
   }
 }
 
 /* Fallback for browsers without container query support */
-@media (max-width: 200px) {
+@media (max-height: 160px) {
   .ig-audio-volume {
     display: none;
   }

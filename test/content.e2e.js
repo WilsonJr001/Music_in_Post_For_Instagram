@@ -37,6 +37,25 @@ vis.cb([{ target, boundingClientRect: { height: 500 },
           intersectionRect: { height: 500 }, rootBounds: { height: 800 } }]);
 step('visivel + mudo -> continua pausado', entry.audio.paused);
 
+// 2b. the vertical volume slider reflects the global volume
+const slider = player.querySelector('.ig-audio-volume');
+const fill = slider.querySelector('.ig-audio-volume-fill');
+const knob = slider.querySelector('.ig-audio-volume-knob');
+step('preenchimento cresce por height', fill.style.height);
+step('botao posicionado por bottom', knob.style.bottom);
+step('aria-valuenow', slider.getAttribute('aria-valuenow'));
+
+S.__t.setGlobalVolume(0.25);
+step('apos volume 0.25 -> height', fill.style.height);
+step('apos volume 0.25 -> bottom', knob.style.bottom);
+
+// track rect in the stub is 500px tall starting at y=0, so y=125 is 75%
+step('arrastar para y=125 -> volume', S.__t.volumeFromPointer(slider, 125));
+step('arrastar para o topo -> volume', S.__t.volumeFromPointer(slider, 0));
+step('arrastar para a base -> volume', S.__t.volumeFromPointer(slider, 500));
+
+S.__t.setGlobalVolume(0.7);
+
 // 3. user clicks the sound button
 const btn = player.querySelector('.ig-audio-btn');
 const icon = () => { const svg = btn.children[0];

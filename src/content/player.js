@@ -12,6 +12,69 @@
 'use strict';
 
 /**
+ * A vertical volume slider, the way Instagram draws its own: a thin track
+ * whose fill grows upward and a knob riding the top of it.
+ *
+ * Built by hand rather than with <input type="range"> because that element
+ * only goes vertical through vendor-specific, inconsistent styling, and
+ * because the states here (collapsed while idle, restored on hover) need to
+ * animate a height we control. Instagram's markup cannot be copied — its
+ * class names are generated and change between deploys — so this mirrors
+ * the behaviour, not the DOM.
+ */
+function buildVolumeSlider(value) {
+  const slider = document.createElement('div');
+  slider.className = 'ig-audio-volume';
+  slider.setAttribute('role', 'slider');
+  slider.setAttribute('aria-label', 'Ajustar volume');
+  slider.setAttribute('aria-valuemin', '0');
+  slider.setAttribute('aria-valuemax', '100');
+  slider.tabIndex = 0;
+
+  const track = document.createElement('div');
+  track.className = 'ig-audio-volume-track';
+
+  const fill = document.createElement('div');
+  fill.className = 'ig-audio-volume-fill';
+
+  const knob = document.createElement('div');
+  knob.className = 'ig-audio-volume-knob';
+
+  track.appendChild(fill);
+  track.appendChild(knob);
+  slider.appendChild(track);
+
+  applyVolumeToSlider(slider, value);
+  return slider;
+}
+
+/** Paint a 0..1 volume onto a slider built by buildVolumeSlider() */
+function applyVolumeToSlider(slider, value) {
+  if (!slider) return;
+
+  const pct = Math.min(100, Math.max(0, value * 100));
+  const fill = slider.querySelector('.ig-audio-volume-fill');
+  const knob = slider.querySelector('.ig-audio-volume-knob');
+
+  if (fill) fill.style.height = pct + '%';
+  if (knob) knob.style.bottom = pct + '%';
+  slider.setAttribute('aria-valuenow', String(Math.round(pct)));
+}
+
+/**
+ * Volume from a pointer position: the track grows upward, so the top of
+ * the box is 1 and the bottom is 0.
+ */
+function volumeFromPointer(slider, clientY) {
+  const track = slider.querySelector('.ig-audio-volume-track') || slider;
+  const rect = track.getBoundingClientRect();
+  if (!rect.height) return null;
+
+  const fraction = 1 - (clientY - rect.top) / rect.height;
+  return Math.min(1, Math.max(0, fraction));
+}
+
+/**
  * Instagram's own volume glyphs, so the control reads as part of the page
  * rather than as something bolted on. Taken from the markup Instagram
  * renders for video posts; the two use different viewBoxes, which is why
@@ -328,22 +391,48 @@ function injectPlayer(article, audioUrl, shortcode, startTime, duration) {
     });
 
     // ── Volume Slider ──
-    const volumeSlider = document.createElement('input');
-    volumeSlider.type = 'range';
-    volumeSlider.className = 'ig-audio-volume';
-    volumeSlider.min = '0';
-    volumeSlider.max = '1';
-    volumeSlider.step = '0.05';
-    volumeSlider.value = String(globalVolume);
+    const volumeSlider = buildVolumeSlider(globalVolume);
     volumeSlider.title = 'Volume';
 
-    volumeSlider.addEventListener('input', (e) => {
-      e.stopPropagation();
-      setGlobalVolume(parseFloat(volumeSlider.value));
+    // Drag anywhere on the track; pointer capture keeps the gesture alive
+    // even when the cursor leaves the 4px-wide column.
+    const applyFromPointer = (e) => {
+      const v = volumeFromPointer(volumeSlider, e.clientY);
+      if (v === null) return;
+      setGlobalVolume(v);
       wakePlayer(article);
+    };
+
+    volumeSlider.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (volumeSlider.setPointerCapture) volumeSlider.setPointerCapture(e.pointerId);
+      applyFromPointer(e);
+    });
+
+    volumeSlider.addEventListener('pointermove', (e) => {
+      if (e.buttons !== 1) return; // only while dragging
+      e.stopPropagation();
+      applyFromPointer(e);
     });
 
     volumeSlider.addEventListener('click', (e) => e.stopPropagation());
+
+    volumeSlider.addEventListener('keydown', (e) => {
+      const STEP = 0.05;
+      let next = null;
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') next = globalVolume + STEP;
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') next = globalVolume - STEP;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = 1;
+      if (next === null) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      setGlobalVolume(Math.min(1, Math.max(0, next)));
+      wakePlayer(article);
+    });
 
     // ── Segment-bounded looping via timeupdate ──
     // When playback reaches the segment end, loop back to start
@@ -362,8 +451,8 @@ function injectPlayer(article, audioUrl, shortcode, startTime, duration) {
     });
 
     // ── Assemble Player (button + volume only) ──
-    container.appendChild(playBtn);
     container.appendChild(volumeSlider);
+    container.appendChild(playBtn);
 
     // Prevent clicks from propagating to Instagram's handlers
     container.addEventListener('click', (e) => e.stopPropagation());

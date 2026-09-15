@@ -41,8 +41,7 @@ function setGlobalVolume(value) {
 
   for (const [, data] of activePlayers) {
     data.audio.volume = v;
-    const slider = data.player && data.player.querySelector('.ig-audio-volume');
-    if (slider && slider.value !== String(v)) slider.value = String(v);
+    applyVolumeToSlider(data.player && data.player.querySelector('.ig-audio-volume'), v);
   }
 }
 

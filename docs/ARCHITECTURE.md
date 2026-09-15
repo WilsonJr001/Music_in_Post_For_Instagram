@@ -107,6 +107,14 @@ not persisted: reopening Instagram should never land on a post already
 playing out loud. Volume is a level rather than a trigger, so that one is
 remembered.
 
+The volume control is a vertical track that fills upward, matching how
+Instagram draws its own — fill by `height: X%`, knob at `bottom: X%`. It is
+built by hand rather than styled from `<input type="range">`, because
+vertical range inputs need vendor-specific hacks that differ per engine and
+because the collapse animation needs a height this code controls.
+Instagram's own markup cannot be reused: its class names are generated and
+change between deploys, so only the behaviour is mirrored.
+
 The sound button uses Instagram's own volume glyphs, lifted from the markup
 it renders for video posts, so the control reads as part of the page. They
 are drawn with `createElementNS` rather than assigned as markup, and the
