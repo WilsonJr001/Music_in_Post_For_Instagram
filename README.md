@@ -83,5 +83,9 @@ No dependencies, no build step.
 
 ## License
 
-For educational and experimental purposes. Not affiliated with, endorsed
-by, or sponsored by Meta or Instagram.
+MIT, see [LICENSE](LICENSE).
+
+Not affiliated with, endorsed by, or sponsored by Meta or Instagram. The
+sound glyphs are Instagram's own, used so the control reads as part of the
+page; see [docs/INTEGRATION.md](docs/INTEGRATION.md) for what native
+support would take.

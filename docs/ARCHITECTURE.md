@@ -61,6 +61,14 @@ have made — but only for posts that actually reach the screen:
 4. The response goes through the normal scanner and comes back as
    `IG_AUDIO_FOUND`.
 
+Posts are also asked about before they arrive. A second observer watches a
+band 1200px below the fold and queues those at low priority, on the reading
+that scrolling a feed is a continuous motion and the next post down is very
+likely the next one looked at. If one reaches the screen while still queued
+it jumps to the front, so the guess never costs the post actually being
+looked at. This changes when requests happen, not how many: the band is
+bounded and the caps below still apply.
+
 Requests are serialised, one media id is asked at most once, and there is a
 hard cap per page load. The whole behaviour is also a setting: the options
 page can switch the extension back to reading only what Instagram fetches
@@ -163,6 +171,9 @@ re-anchored one level up and logs `Player drifted outside post`.
 | `src/content/discovery.js` | asking the page world for metadata |
 | `src/content/main.js` | bootstrap |
 | `src/options/` | the options page |
+
+See also [INTEGRATION.md](INTEGRATION.md), which records what the web
+client would need to ship this natively.
 
 Load order is the order in `manifest.json`. All files in a world share one
 scope, so names are visible across files without any module plumbing.
