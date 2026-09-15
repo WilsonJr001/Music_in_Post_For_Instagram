@@ -128,6 +128,15 @@ Instagram ships them that way.
 
 ## Anchoring the player
 
+The anchor is chosen by measurement, not by markup. The largest `<img>` or
+`<video>` in the article is the post's media (avatars and badges are images
+too, so area is what separates them), and the player attaches to the
+outermost ancestor that still hugs it. Stopping there matters: the next box
+up is the post body, which on a single photo in view mode holds the picture
+*and* the caption and comments column, and anchoring there put the player
+outside the photo. Role and class based strategies remain as fallbacks for
+the moment before layout has happened.
+
 Instagram's carousel is a horizontal scroll-snap container. A
 `position: absolute` player placed inside it is positioned against the
 container's *content*, so swiping carries it one slide-width out of view.
