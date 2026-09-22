@@ -1,3 +1,5 @@
+<img src="icons/icon-256.png" alt="Instagram Web Photo Audio Enabler icon" width="96">
+
 # Instagram Web Photo Audio Enabler
 
 A Firefox extension that plays the music attached to photo and carousel
