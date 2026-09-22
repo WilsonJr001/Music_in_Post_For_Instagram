@@ -1,32 +1,57 @@
 {
   "manifest_version": 3,
   "name": "Instagram Photo Audio Enabler",
-  "version": "1.0.0",
-  "description": "Enables audio playback on Instagram photo/carousel posts that have associated music metadata.",
+  "version": "1.3.0",
+  "description": "Plays the music attached to Instagram photo and carousel posts, which the web client downloads but never exposes.",
   "browser_specific_settings": {
     "gecko": {
       "id": "instagram-photo-audio@musicpost",
-      "strict_min_version": "109.0"
+      "strict_min_version": "128.0"
     }
   },
   "permissions": [
-    "activeTab"
+    "storage"
   ],
   "host_permissions": [
-    "*://*.instagram.com/*"
+    "*://*.instagram.com/*",
+    "*://*.cdninstagram.com/*",
+    "*://*.fbcdn.net/*"
   ],
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": false
+  },
   "content_scripts": [
     {
-      "matches": ["*://*.instagram.com/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"],
-      "run_at": "document_start"
-    }
-  ],
-  "web_accessible_resources": [
+      "matches": [
+        "*://*.instagram.com/*"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "js": [
+        "src/page/payload.js",
+        "src/page/scanner.js",
+        "src/page/media-info.js",
+        "src/page/interceptor.js"
+      ]
+    },
     {
-      "resources": ["inject.js"],
-      "matches": ["*://*.instagram.com/*"]
+      "matches": [
+        "*://*.instagram.com/*"
+      ],
+      "run_at": "document_start",
+      "css": [
+        "src/styles.css"
+      ],
+      "js": [
+        "src/content/state.js",
+        "src/content/preferences.js",
+        "src/content/dom.js",
+        "src/content/player.js",
+        "src/content/playback.js",
+        "src/content/discovery.js",
+        "src/content/main.js"
+      ]
     }
   ]
 }

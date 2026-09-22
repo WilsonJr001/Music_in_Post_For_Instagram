@@ -1,0 +1,7 @@
+# HAR captures carry live Instagram session cookies (sessionid, csrftoken).
+# Never commit them.
+*.har
+
+# Console captures — may contain shortcodes and signed CDN URLs.
+logs/
+console_log.txt
